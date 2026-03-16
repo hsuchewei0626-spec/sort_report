@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>選擇排序法 Selection Sort 示範</title>
+  <style>
+    body{font-family:Segoe UI,Roboto,Arial;display:flex;flex-direction:column;align-items:center;margin:20px}
+    h1{font-size:20px;margin-bottom:6px}
+    .controls{display:flex;gap:8px;align-items:center;margin-bottom:12px}
+    input[type=range]{width:140px}
+    #canvas{width:800px;height:320px;border:1px solid #ddd;padding:10px;display:flex;align-items:end;gap:4px;background:#fafafa}
+    .bar{background:#4aa3df;width:24px;border-radius:3px;display:flex;align-items:end;justify-content:center;color:#fff;font-size:11px}
+    .bar.swap{background:#ef6c6c}
+    .bar.compare{background:#f0a202}
+    .bar.min{background:#7bd389}
+    .small{font-size:13px;color:#666}
+    footer{margin-top:12px;color:#666;font-size:13px}
+    button,select,input[type=number]{padding:6px 8px;border-radius:4px;border:1px solid #ccc;background:white}
+  </style>
+</head>
+<body>
+  <h1>選擇排序法（Selection Sort）示範</h1>
+  <div class="controls">
+    <label class="small">元素數量:</label>
+    <input id="size" type="number" min="5" max="80" value="20" style="width:64px" />
+    <label class="small">速度:</label>
+    <input id="speed" type="range" min="10" max="1000" value="200" />
+    <button id="random">隨機產生</button>
+    <button id="start">開始</button>
+    <button id="pause">暫停</button>
+    <button id="step">單步</button>
+  </div>
+
+  <div id="canvas" aria-live="polite"></div>
+  <footer>說明：黃色 = 比較，綠色 = 當前最小值，紅色 = 交換。可調整速度與大小，按「單步」可執行一個比較或交換步驟。</footer>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const sizeInput = document.getElementById('size');
+    const speedInput = document.getElementById('speed');
+    const randomBtn = document.getElementById('random');
+    const startBtn = document.getElementById('start');
+    const pauseBtn = document.getElementById('pause');
+    const stepBtn = document.getElementById('step');
+
+    let arr = [];
+    let bars = [];
+    let running = false;
+    let paused = false;
+    let delay = ms => new Promise(r=>setTimeout(r,ms));
+
+    function createArray(n){
+      arr = Array.from({length:n},()=>Math.floor(Math.random()*100)+5);
+      render();
+    }
+
+    function clearCanvas(){
+      canvas.innerHTML='';
+      bars = [];
+    }
+
+    function render(){
+      clearCanvas();
+      const max = Math.max(...arr);
+      const width = Math.min(24, Math.floor((canvas.clientWidth - (arr.length-1)*4)/arr.length));
+      arr.forEach((v,i)=>{
+        const bar = document.createElement('div');
+        bar.className = 'bar';
+        bar.style.height = Math.max(8, Math.round((v/max)*(canvas.clientHeight-20)))+'px';
+        bar.style.width = width+'px';
+        bar.textContent = v;
+        canvas.appendChild(bar);
+        bars.push(bar);
+      })
+    }
+
+    function mark(i,cls){ if(bars[i]) bars[i].classList.add(cls); }
+    function unmark(i,cls){ if(bars[i]) bars[i].classList.remove(cls); }
+
+    async function selectionSort(){
+      running = true;
+      paused = false;
+      const n = arr.length;
+      for(let i=0;i<n-1;i++){
+        let minIdx = i;
+        mark(minIdx,'min');
+        for(let j=i+1;j<n;j++){
+          if(!running) return;
+          mark(j,'compare');
+          await delay(Number(speedInput.value));
+          if(paused){ await waitWhilePaused(); }
+          if(arr[j] < arr[minIdx]){
+            unmark(minIdx,'min');
+            minIdx = j;
+            mark(minIdx,'min');
+            await delay(Number(speedInput.value));
+          }
+          unmark(j,'compare');
+          if(paused){ await waitWhilePaused(); }
+        }
+        if(minIdx !== i){
+          mark(i,'swap'); mark(minIdx,'swap');
+          await delay(Number(speedInput.value));
+          swap(i,minIdx);
+          await delay(Number(speedInput.value));
+          unmark(i,'swap'); unmark(minIdx,'swap');
+        }
+        unmark(minIdx,'min');
+        if(paused){ await waitWhilePaused(); }
+      }
+      running = false;
+    }
+
+    function swap(i,j){
+      const t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+      const max = Math.max(...arr);
+      bars[i].style.height = Math.max(8, Math.round((arr[i]/max)*(canvas.clientHeight-20)))+'px';
+      bars[j].style.height = Math.max(8, Math.round((arr[j]/max)*(canvas.clientHeight-20)))+'px';
+      bars[i].textContent = arr[i];
+      bars[j].textContent = arr[j];
+    }
+
+    function stopRun(){ running = false; }
+
+    function waitWhilePaused(){
+      return new Promise(resolve=>{
+        const check = ()=>{ if(!paused) resolve(); else setTimeout(check,50); };
+        check();
+      })
+    }
+
+    // stepper state for single-step operation
+    let stepState = {i:0,j:1,minIdx:0,phase:'compare'};
+    function resetStepState(){ stepState={i:0,j:1,minIdx:0,phase:'compare'}; }
+
+    function stepOnce(){
+      const n = arr.length;
+      // clear any highlight
+      for(let k=0;k<n;k++){ unmark(k,'compare'); unmark(k,'swap'); unmark(k,'min'); }
+
+      if(stepState.i >= n-1) return;
+
+      const i = stepState.i;
+      if(stepState.phase === 'compare'){
+        const j = stepState.j;
+        mark(j,'compare');
+        mark(stepState.minIdx,'min');
+        if(arr[j] < arr[stepState.minIdx]){
+          unmark(stepState.minIdx,'min');
+          stepState.minIdx = j;
+          mark(stepState.minIdx,'min');
+        }
+        // advance j
+        stepState.j++;
+        if(stepState.j >= n){
+          stepState.phase = 'swap';
+        }
+      } else if(stepState.phase === 'swap'){
+        if(stepState.minIdx !== i){
+          mark(i,'swap'); mark(stepState.minIdx,'swap');
+          swap(i,stepState.minIdx);
+          unmark(i,'swap'); unmark(stepState.minIdx,'swap');
+        }
+        // move to next i
+        stepState.i++;
+        stepState.minIdx = stepState.i;
+        stepState.j = stepState.i + 1;
+        stepState.phase = 'compare';
+      }
+    }
+
+    // UI bindings
+    randomBtn.addEventListener('click',()=>{ createArray(Number(sizeInput.value)); resetStepState(); });
+    startBtn.addEventListener('click',()=>{ if(!running) selectionSort(); else { paused=false; } });
+    pauseBtn.addEventListener('click',()=>{ paused = true; });
+    stepBtn.addEventListener('click',()=>{ if(running) { paused=true; } stepOnce(); });
+
+    // initialize
+    createArray(Number(sizeInput.value));
+
+    window.__selection = {arr,bars,render,createArray};
+  </script>
+</body>
+</html>
