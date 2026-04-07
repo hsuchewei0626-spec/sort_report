@@ -299,7 +299,7 @@
         mark(i, 'insert');
         while(j >= 0 && arr[j] > key){
           mark(j, 'compare');
-          await delay(Number(speedInput.value));
+          await delay(1010 - Number(speedInput.value));
           if(paused){ await waitWhilePaused(); }
           arr[j+1] = arr[j];
           updateBar(j+1);

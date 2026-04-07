@@ -293,20 +293,20 @@
         for(let j=i+1;j<n;j++){
           if(!running) return;
           mark(j,'compare');
-          await delay(Number(speedInput.value));
+          await delay(1010 - Number(speedInput.value));
           if(paused){ await waitWhilePaused(); }
           if(arr[j] < arr[minIdx]){
             unmark(minIdx,'min');
             minIdx = j;
             mark(minIdx,'min');
-            await delay(Number(speedInput.value));
+            await delay(1010 - Number(speedInput.value));
           }
           unmark(j,'compare');
           if(paused){ await waitWhilePaused(); }
         }
         if(minIdx !== i){
           mark(i,'swap'); mark(minIdx,'swap');
-          await delay(Number(speedInput.value));
+          await delay(1010 - Number(speedInput.value));
           swap(i,minIdx);
           await delay(Number(speedInput.value));
           unmark(i,'swap'); unmark(minIdx,'swap');

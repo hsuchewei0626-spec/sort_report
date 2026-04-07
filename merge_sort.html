@@ -332,7 +332,7 @@
       for(let p = left; p <= right; p++){
         mark(p, 'merge');
       }
-      await delay(Number(speedInput.value));
+      await delay(1010 - Number(speedInput.value));
       if(paused){ await waitWhilePaused(); }
 
       while(i < leftArr.length && j < rightArr.length){
@@ -341,7 +341,7 @@
         // Mark comparison
         mark(left + i, 'compare');
         mark(mid + 1 + j, 'compare');
-        await delay(Number(speedInput.value));
+        await delay(1010 - Number(speedInput.value));
         if(paused){ await waitWhilePaused(); }
 
         if(leftArr[i] <= rightArr[j]){
@@ -355,7 +355,7 @@
         }
         updateBar(k);
         k++;
-        await delay(Number(speedInput.value));
+        await delay(1010 - Number(speedInput.value));
         if(paused){ await waitWhilePaused(); }
       }
 
@@ -366,7 +366,7 @@
         updateBar(k);
         i++;
         k++;
-        await delay(Number(speedInput.value));
+        await delay(1010 - Number(speedInput.value));
         if(paused){ await waitWhilePaused(); }
       }
 
@@ -377,7 +377,7 @@
         updateBar(k);
         j++;
         k++;
-        await delay(Number(speedInput.value));
+        await delay(1010 - Number(speedInput.value));
         if(paused){ await waitWhilePaused(); }
       }
 
@@ -390,7 +390,7 @@
       for(let p = left; p <= right; p++){
         mark(p, 'sorted');
       }
-      await delay(Number(speedInput.value));
+      await delay(1010 - Number(speedInput.value));
       if(paused){ await waitWhilePaused(); }
     }
 

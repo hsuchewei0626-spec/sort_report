@@ -290,17 +290,17 @@
           // compare
           mark(j,'compare');
           mark(j+1,'compare');
-          await delay(Number(speedInput.value));
+          await delay(1010 - Number(speedInput.value));
           if(paused){ await waitWhilePaused(); }
 
           if(arr[j] > arr[j+1]){
             // swap
             mark(j,'swap');
             mark(j+1,'swap');
-            await delay(Number(speedInput.value));
+            await delay(1010 - Number(speedInput.value));
             swap(j,j+1);
             swapped = true;
-            await delay(Number(speedInput.value));
+            await delay(1010 - Number(speedInput.value));
             unmark(j,'swap');
             unmark(j+1,'swap');
           }

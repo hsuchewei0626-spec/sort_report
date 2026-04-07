@@ -335,16 +335,16 @@
         if(!running) return i + 1;
         
         mark(j, 'compare');
-        await delay(Number(speedInput.value));
+        await delay(1010 - Number(speedInput.value));
         if(paused){ await waitWhilePaused(); }
 
         if(arr[j] < pivotValue){
           i++;
           mark(i, 'compare');
-          await delay(Number(speedInput.value));
+          await delay(1010 - Number(speedInput.value));
           swap(i, j);
           unmark(i, 'compare');
-          await delay(Number(speedInput.value));
+          await delay(1010 - Number(speedInput.value));
         }
         unmark(j, 'compare');
       }
@@ -352,7 +352,7 @@
       swap(i + 1, high);
       unmark(high, 'pivot');
       mark(i + 1, 'sorted');
-      await delay(Number(speedInput.value));
+      await delay(1010 - Number(speedInput.value));
       
       return i + 1;
     }
