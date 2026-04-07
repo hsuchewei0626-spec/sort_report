@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>合併排序法 Merge Sort 示範</title>
+  <title>快速排序法 Quick Sort 示範</title>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
     body {
@@ -121,9 +121,9 @@
       background: linear-gradient(180deg, #f0a202 0%, #d98a00 100%);
       box-shadow: 0 2px 8px rgba(240, 162, 2, 0.4);
     }
-    .bar.merge {
-      background: linear-gradient(180deg, #7bd389 0%, #5fc560 100%);
-      box-shadow: 0 2px 8px rgba(123, 211, 137, 0.4);
+    .bar.pivot {
+      background: linear-gradient(180deg, #e94b3c 0%, #d63e2f 100%);
+      box-shadow: 0 2px 8px rgba(233, 75, 60, 0.4);
     }
     .bar.sorted {
       background: linear-gradient(180deg, #52c4b8 0%, #3eb8ac 100%);
@@ -149,7 +149,7 @@
       border-radius: 3px;
     }
     .color-compare { background: #f0a202; }
-    .color-merge { background: #7bd389; }
+    .color-pivot { background: #e94b3c; }
     .color-sorted { background: #52c4b8; }
     button, input[type=number] {
       padding: 10px 14px;
@@ -194,8 +194,8 @@
 </head>
 <body>
   <div class="page-header">
-    <h1>🔀 合併排序法</h1>
-    <p class="algorithm-desc">Merge Sort - 分治法將數組分解後合併排序</p>
+    <h1>⚡ 快速排序法</h1>
+    <p class="algorithm-desc">Quick Sort - 分治法選定枢軸進行快速排序</p>
     <div class="timer-display">耗時: <span id="timer">0.00</span> 秒</div>
   </div>
   <div class="controls">
@@ -212,11 +212,11 @@
   </div>
   <div class="legend">
     <div class="legend-item"><div class="legend-color color-compare"></div>比較</div>
-    <div class="legend-item"><div class="legend-color color-merge"></div>合併</div>
+    <div class="legend-item"><div class="legend-color color-pivot"></div>枢軸</div>
     <div class="legend-item"><div class="legend-color color-sorted"></div>已排序</div>
   </div>
   <div id="canvas" aria-live="polite"></div>
-  <footer>說明：黃色 = 比較，綠色 = 合併操作，藍綠色 = 已排序。採用分治法逐步分解與合併陣列。可調整速度與大小，按「單步」可執行一次操作。</footer>
+  <footer>說明：黃色 = 比較，紅色 = 枢軸元素，藍綠色 = 已排序。採用快速排序進行分割與排序。可調整速度與大小。</footer>
 
   <script>
     const canvas = document.getElementById('canvas');
@@ -274,6 +274,12 @@
       }
     }
 
+    function swap(i,j){
+      const t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+      updateBar(i);
+      updateBar(j);
+    }
+
     function resetTimer(){
       clearInterval(timerInterval);
       elapsedTime = 0;
@@ -292,106 +298,63 @@
       clearInterval(timerInterval);
     }
 
-    async function mergeSort(){
+    async function quickSort(){
       running = true;
       paused = false;
       startTimer();
-      await mergeSortHelper(0, arr.length - 1);
+      await quickSortHelper(0, arr.length - 1);
+      
       // Mark all as sorted at the end
       for(let i = 0; i < arr.length; i++){
         unmark(i, 'compare');
-        unmark(i, 'merge');
+        unmark(i, 'pivot');
         mark(i, 'sorted');
       }
       stopTimer();
       running = false;
     }
 
-    async function mergeSortHelper(left, right){
+    async function quickSortHelper(low, high){
       if(!running) return;
-      if(left >= right) return;
+      if(low >= high) return;
 
-      const mid = Math.floor((left + right) / 2);
-      
-      // Sort left half
-      await mergeSortHelper(left, mid);
-      // Sort right half
-      await mergeSortHelper(mid + 1, right);
-      // Merge
-      await merge(left, mid, right);
+      const pi = await partition(low, high);
+      await quickSortHelper(low, pi - 1);
+      await quickSortHelper(pi + 1, high);
     }
 
-    async function merge(left, mid, right){
-      if(!running) return;
+    async function partition(low, high){
+      if(!running) return low;
       
-      const leftArr = arr.slice(left, mid + 1);
-      const rightArr = arr.slice(mid + 1, right + 1);
-      let i = 0, j = 0, k = left;
+      const pivotValue = arr[high];
+      mark(high, 'pivot');
+      
+      let i = low - 1;
 
-      // Mark the range being merged
-      for(let p = left; p <= right; p++){
-        mark(p, 'merge');
-      }
-      await delay(Number(speedInput.value));
-      if(paused){ await waitWhilePaused(); }
-
-      while(i < leftArr.length && j < rightArr.length){
-        if(!running) return;
+      for(let j = low; j < high; j++){
+        if(!running) return i + 1;
         
-        // Mark comparison
-        mark(left + i, 'compare');
-        mark(mid + 1 + j, 'compare');
+        mark(j, 'compare');
         await delay(Number(speedInput.value));
         if(paused){ await waitWhilePaused(); }
 
-        if(leftArr[i] <= rightArr[j]){
-          arr[k] = leftArr[i];
-          unmark(left + i, 'compare');
+        if(arr[j] < pivotValue){
           i++;
-        } else {
-          arr[k] = rightArr[j];
-          unmark(mid + 1 + j, 'compare');
-          j++;
+          mark(i, 'compare');
+          await delay(Number(speedInput.value));
+          swap(i, j);
+          unmark(i, 'compare');
+          await delay(Number(speedInput.value));
         }
-        updateBar(k);
-        k++;
-        await delay(Number(speedInput.value));
-        if(paused){ await waitWhilePaused(); }
+        unmark(j, 'compare');
       }
 
-      while(i < leftArr.length){
-        if(!running) return;
-        arr[k] = leftArr[i];
-        unmark(left + i, 'compare');
-        updateBar(k);
-        i++;
-        k++;
-        await delay(Number(speedInput.value));
-        if(paused){ await waitWhilePaused(); }
-      }
-
-      while(j < rightArr.length){
-        if(!running) return;
-        arr[k] = rightArr[j];
-        unmark(mid + 1 + j, 'compare');
-        updateBar(k);
-        j++;
-        k++;
-        await delay(Number(speedInput.value));
-        if(paused){ await waitWhilePaused(); }
-      }
-
-      // Unmark merge
-      for(let p = left; p <= right; p++){
-        unmark(p, 'merge');
-      }
-      
-      // Mark merged section as sorted
-      for(let p = left; p <= right; p++){
-        mark(p, 'sorted');
-      }
+      swap(i + 1, high);
+      unmark(high, 'pivot');
+      mark(i + 1, 'sorted');
       await delay(Number(speedInput.value));
-      if(paused){ await waitWhilePaused(); }
+      
+      return i + 1;
     }
 
     function stopRun(){ running = false; }
@@ -408,14 +371,14 @@
       stopRun();
       createArray(Number(sizeInput.value)); 
     });
-    startBtn.addEventListener('click',()=>{ if(!running) mergeSort(); else { paused=false; } });
+    startBtn.addEventListener('click',()=>{ if(!running) quickSort(); else { paused=false; } });
     pauseBtn.addEventListener('click',()=>{ paused = true; });
     stepBtn.addEventListener('click',()=>{ if(running) { paused=true; } });
 
     // initialize
     createArray(Number(sizeInput.value));
 
-    window.__merge = {arr,bars,render,createArray};
+    window.__quick = {arr,bars,render,createArray};
   </script>
 </body>
 </html>
