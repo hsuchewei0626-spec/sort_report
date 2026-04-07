@@ -114,7 +114,7 @@
       display: flex;
       align-items: flex-end;
       justify-content: center;
-      color: transparent;
+      color: #fff;
       font-size: 9px;
       font-weight: 600;
       transition: all 0.1s ease;
@@ -353,15 +353,15 @@
 <body>
   <div class="page-header">
     <h1>⚡ 快速排序法</h1>
-    <p class="algorithm-desc">Quick Sort - 分治法選定枢軸進行快速排序</p>
+    <p class="algorithm-desc">Quick Sort - 分治法選定樞軸進行快速排序</p>
   </div>
 
   <div class="principle-section">
     <h2>📚 排序原理詳解</h2>
-    <p><span class="highlight">快速排序</span>是一種高效的<span class="highlight">分治法</span>排序演算法，透過<span class="highlight">預設定枢軸</span>進行分割。</p>
+    <p><span class="highlight">快速排序</span>是一種高效的<span class="highlight">分治法</span>排序演算法，透過<span class="highlight">預設定樞軸</span>進行分割。</p>
     <p><strong>核心概念：</strong></p>
-    <p>• 選擇一個<span class="highlight">枢軸（Pivot）</span>元素</p>
-    <p>• 將陣列分割為：小於枢軸 | 枢軸 | 大於枢軸</p>
+    <p>• 選擇一個<span class="highlight">樞軸（Pivot）</span>元素</p>
+    <p>• 將陣列分割為：小於樞軸 | 樞軸 | 大於樞軸</p>
     <p>• 對<span class="highlight">左右子陣列</span>遞歸地進行相同操作</p>
     <p>• 直到整個陣列有序為止</p>
     <p><strong>時間複雜度：</strong> 最差 O(n²) | 平均 O(n log n) | 最佳 O(n log n)</p>
@@ -379,11 +379,11 @@
     <button id="start">開始</button>
     <button id="pause">暫停</button>
     <button id="step">單步</button>
-    <a href="index.html"><button class="home-btn">🏠 回首頁</button></a>
+    <a href="index.html"><button class="home-btn" onclick="window.close();">🏠 回首頁</button></a>
   </div>
   <div class="legend">
     <div class="legend-item"><div class="legend-color color-compare"></div>比較</div>
-    <div class="legend-item"><div class="legend-color color-pivot"></div>枢軸</div>
+    <div class="legend-item"><div class="legend-color color-pivot"></div>樞軸</div>
     <div class="legend-item"><div class="legend-color color-sorted"></div>已排序</div>
   </div>
   <div id="canvas" aria-live="polite"></div>
@@ -418,7 +418,7 @@
     </div>
   </div>
   
-  <footer>說明：黃色 = 比較，紅色 = 枢軸元素，藍綠色 = 已排序。採用快速排序進行分割與排序。可調整速度與大小。</footer>
+  <footer>說明：黃色 = 比較，紅色 = 樞軸元素，藍綠色 = 已排序。採用快速排序進行分割與排序。可調整速度與大小。</footer>
 
   <script>
     const canvas = document.getElementById('canvas');
