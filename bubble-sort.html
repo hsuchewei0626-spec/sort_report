@@ -250,6 +250,77 @@
       0%, 100% { opacity: 1; }
       50% { opacity: 0.6; }
     }
+    .principle-section {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 24px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      max-width: 900px;
+      box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+    }
+    .principle-section h2 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .principle-section p {
+      font-size: 14px;
+      line-height: 1.8;
+      margin-bottom: 10px;
+    }
+    .highlight {
+      background: rgba(255, 255, 255, 0.3);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .step-explanation {
+      background: white;
+      border: 2px solid #667eea;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+      max-width: 900px;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+    }
+    .step-explanation h3 {
+      color: #667eea;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .step-explanation p {
+      color: #555;
+      font-size: 13px;
+      line-height: 1.7;
+      margin-bottom: 6px;
+    }
+    .home-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      margin-left: auto;
+    }
+    .home-btn:hover {
+      background: linear-gradient(135deg, #5568d3 0%, #6a3d8a 100%);
+      color: white;
+    }
+    .info-panel {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+      max-width: 900px;
+    }
+    @media (max-width: 768px) {
+      .info-panel {
+        grid-template-columns: 1fr;
+      }
+      .principle-section {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>
@@ -257,6 +328,19 @@
     <h1>🫧 氣泡排序法</h1>
     <p class="algorithm-desc">Bubble Sort - 相鄰元素比較並交換</p>
   </div>
+
+  <div class="principle-section">
+    <h2>📚 排序原理詳解</h2>
+    <p><span class="highlight">氣泡排序</span>是一種簡單的排序演算法，它重複地走訪要排序的數列。</p>
+    <p><strong>核心概念：</strong></p>
+    <p>• 比較<span class="highlight">相鄰的兩個元素</span>，若順序錯誤則<span class="highlight">交換</span>它們</p>
+    <p>• 一次完整的走訪後，<span class="highlight">最大的元素</span>會「浮」到最後</p>
+    <p>• 重複此過程，每次都將下一個最大元素放在正確位置</p>
+    <p>• 直到整個陣列有序為止</p>
+    <p><strong>時間複雜度：</strong> 最差 O(n²) | 平均 O(n²) | 最佳 O(n)（已排序陣列）</p>
+    <p><strong>空間複雜度：</strong> O(1)（原地排序）</p>
+  </div>
+
   <div class="controls">
     <label class="small">大小:</label>
     <input id="size" type="number" min="5" max="50" value="20" style="width:64px" />
@@ -268,26 +352,22 @@
     <button id="start">開始</button>
     <button id="pause">暫停</button>
     <button id="step">單步</button>
+    <a href="index.html"><button class="home-btn">🏠 回首頁</button></a>
   </div>
   <div class=\"legend\">
     <div class=\"legend-item\"><div class=\"legend-color color-compare\"></div>比較</div>
     <div class=\"legend-item\"><div class=\"legend-color color-swap\"></div>交換</div>
   </div>
   <div id="canvas" aria-live="polite"></div>
+
+  <div class="step-explanation">
+    <h3>📍 當前步驟</h3>
+    <p id="stepText">準備開始 - 點擊「隨機產生」或「開始」來開始排序</p>
+  </div>
   
   <div class="info-panel">
     <div class="info-section">
-      <div class="info-title">📚 排序原理</div>
-      <div class="info-content">
-        逐次比較相鄰的兩個元素，若順序錯誤則交換，重複此過程直到陣列有序。
-      </div>
-      <div class="complexity">
-        ⏱ 時間複雜度：<br>
-        最差：O(n²) | 平均：O(n²) | 最佳：O(n)
-      </div>
-    </div>
-    <div class="info-section">
-      <div class="info-title">📊 統計資訊</div>
+      <div class="info-title"> 統計資訊</div>
       <div class="stats-row">
         <span class="stats-label">比較次數：</span>
         <span class="stats-value" id="compareCount">0</span>
@@ -354,6 +434,10 @@
       setStatus('status-idle');
     }
 
+    function updateStepExplanation(explanation){
+      document.getElementById('stepText').textContent = explanation;
+    }
+
     function createArray(n){
       arr = Array.from({length:n},()=>Math.floor(Math.random()*100)+5);
       render();
@@ -413,7 +497,8 @@
       for(let i=0;i<n-1;i++){
         let swapped = false;
         for(let j=0;j<n-1-i;j++){
-          if(!running) return; // stopped externally
+          if(!running) return;
+          updateStepExplanation(`第 ${i+1} 輪，比較位置 ${j} 和 ${j+1}（值: ${arr[j]} vs ${arr[j+1]}）`);
           // compare
           mark(j,'compare');
           mark(j+1,'compare');
@@ -423,6 +508,7 @@
           if(paused){ await waitWhilePaused(); }
 
           if(arr[j] > arr[j+1]){
+            updateStepExplanation(`第 ${i+1} 輪，${arr[j]} > ${arr[j+1]}，執行交換`);
             // swap
             mark(j,'swap');
             mark(j+1,'swap');
@@ -439,9 +525,13 @@
           unmark(j+1,'compare');
           if(paused){ await waitWhilePaused(); }
         }
-        if(!swapped) break;
+        if(!swapped) {
+          updateStepExplanation(`陣列已排序，無需進行進一步比較`);
+          break;
+        }
       }
       stopTimer();
+      updateStepExplanation(`✅ 排序完成！共進行了 ${compareCount} 次比較和 ${swapCount} 次交換`);
       setStatus('status-completed');
       running = false;
     }
@@ -475,11 +565,19 @@
       // clear previous marks
       unmark(j,'compare'); unmark(j+1,'compare'); unmark(j,'swap'); unmark(j+1,'swap');
       // compare
+      updateStepExplanation(`[單步] 第 ${i+1} 輪，比較位置 ${j} 和 ${j+1}（值: ${arr[j]} vs ${arr[j+1]}）`);
       mark(j,'compare'); mark(j+1,'compare');
       if(arr[j] > arr[j+1]){
+        updateStepExplanation(`[單步] ${arr[j]} > ${arr[j+1]}，執行交換`);
         mark(j,'swap'); mark(j+1,'swap');
         swap(j,j+1);
+        compareCount++;
+        swapCount++;
+        updateStats();
         unmark(j,'swap'); unmark(j+1,'swap');
+      } else {
+        compareCount++;
+        updateStats();
       }
       unmark(j,'compare'); unmark(j+1,'compare');
       stepState.j++;
@@ -487,7 +585,7 @@
     }
 
     // UI bindings
-    randomBtn.addEventListener('click',()=>{ createArray(Number(sizeInput.value)); resetStepState(); });
+    randomBtn.addEventListener('click',()=>{ createArray(Number(sizeInput.value)); resetStepState(); updateStepExplanation('準備開始 - 點擊「開始」或「單步」來開始'); });
     startBtn.addEventListener('click',()=>{ if(!running) bubbleSort(); else { paused=false; setStatus('status-running'); } });
     pauseBtn.addEventListener('click',()=>{ paused = true; setStatus('status-paused'); });
     stepBtn.addEventListener('click',()=>{ if(running) { paused=true; } stepOnce(); });
