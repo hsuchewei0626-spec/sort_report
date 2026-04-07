@@ -5,21 +5,187 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>氣泡排序法 Bubble Sort 示範</title>
   <style>
-    body{font-family:Segoe UI,Roboto,Arial;display:flex;flex-direction:column;align-items:center;margin:20px}
-    h1{font-size:20px;margin-bottom:6px}
-    .controls{display:flex;gap:8px;align-items:center;margin-bottom:12px}
-    input[type=range]{width:140px}
-    #canvas{width:800px;height:320px;border:1px solid #ddd;padding:10px;display:flex;align-items:end;gap:4px;background:#fafafa}
-    .bar{background:#4aa3df;width:24px;border-radius:3px;display:flex;align-items:end;justify-content:center;color:#fff;font-size:11px}
-    .bar.swap{background:#ef6c6c}
-    .bar.compare{background:#f0a202}
-    .small{font-size:13px;color:#666}
-    footer{margin-top:12px;color:#666;font-size:13px}
-    button,select,input[type=number]{padding:6px 8px;border-radius:4px;border:1px solid #ccc;background:white}
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e8eef5 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 20px;
+      min-height: 100vh;
+    }
+    .page-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #2c3e50;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .algorithm-desc {
+      font-size: 13px;
+      color: #7f8c8d;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 20px;
+      background: white;
+      padding: 16px 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      max-width: 900px;
+    }
+    .control-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    label.small {
+      font-size: 12px;
+      color: #555;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    input[type=range] {
+      width: 140px;
+      height: 6px;
+      border-radius: 3px;
+      background: linear-gradient(to right, #e8eef5, #667eea);
+      outline: none;
+      -webkit-appearance: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+    }
+    input[type=range]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+    }
+    #canvas {
+      width: 100%;
+      max-width: 900px;
+      height: 320px;
+      border: none;
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9fc 100%);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      margin-bottom: 20px;
+    }
+    .bar {
+      background: linear-gradient(180deg, #667eea 0%, #5568d3 100%);
+      flex-shrink: 0;
+      border-radius: 4px 4px 0 0;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 600;
+      transition: all 0.1s ease;
+      box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+    }
+    .bar.swap {
+      background: linear-gradient(180deg, #ef6c6c 0%, #e85555 100%);
+      box-shadow: 0 2px 8px rgba(239, 108, 108, 0.4);
+    }
+    .bar.compare {
+      background: linear-gradient(180deg, #f0a202 0%, #d98a00 100%);
+      box-shadow: 0 2px 8px rgba(240, 162, 2, 0.4);
+    }
+    .legend {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      font-size: 12px;
+      color: #555;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .legend-item {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .legend-color {
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+    }
+    .color-compare { background: #f0a202; }
+    .color-swap { background: #ef6c6c; }
+    button, input[type=number] {
+      padding: 10px 14px;
+      border-radius: 6px;
+      border: none;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: white;
+      color: #555;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+    button:hover {
+      background: #f0f0f0;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+    button:active {
+      transform: scale(0.98);
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    input[type=number] {
+      width: 70px;
+      text-align: center;
+    }
+    footer {
+      margin-top: 20px;
+      padding: 16px 20px;
+      color: #7f8c8d;
+      font-size: 12px;
+      line-height: 1.6;
+      background: white;
+      border-radius: 8px;
+      max-width: 900px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      border-left: 3px solid #667eea;
+    }
   </style>
 </head>
 <body>
-  <h1>氣泡排序法（Bubble Sort）示範</h1>
+  <div class=\"page-header\">
+    <h1>🫧 氣泡排序法</h1>
+    <p class=\"algorithm-desc\">Bubble Sort - 相鄰元素比較並交換</p>
+  </div>
   <div class="controls">
     <label class="small">大小:</label>
     <input id="size" type="number" min="5" max="50" value="20" style="width:64px" />
@@ -30,7 +196,10 @@
     <button id="pause">暫停</button>
     <button id="step">單步</button>
   </div>
-
+  <div class=\"legend\">
+    <div class=\"legend-item\"><div class=\"legend-color color-compare\"></div>比較</div>
+    <div class=\"legend-item\"><div class=\"legend-color color-swap\"></div>交換</div>
+  </div>
   <div id="canvas" aria-live="polite"></div>
   <footer>說明：黃色 = 比較，紅色 = 交換。可調整速度與大小，按「單步」可執行一個交換或比較步驟。</footer>
 
