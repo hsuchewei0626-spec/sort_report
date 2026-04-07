@@ -190,6 +190,71 @@
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
       border-left: 3px solid #667eea;
     }
+    .info-panel {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+      max-width: 900px;
+    }
+    .info-section {
+      background: white;
+      padding: 16px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+    .info-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .info-content {
+      font-size: 12px;
+      color: #666;
+      line-height: 1.8;
+    }
+    .complexity {
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      background: #f5f5f5;
+      padding: 8px;
+      border-radius: 4px;
+      margin-top: 6px;
+    }
+    .stats-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 8px 0;
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+    }
+    .stats-label {
+      font-weight: 600;
+      color: #555;
+    }
+    .stats-value {
+      color: #667eea;
+      font-weight: 600;
+    }
+    .status-indicator {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+    .status-idle { background: #ccc; }
+    .status-running { background: #52c41a; animation: pulse 1s infinite; }
+    .status-paused { background: #faad14; }
+    .status-completed { background: #52c4b8; }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
   </style>
 </head>
 <body>
@@ -216,6 +281,42 @@
     <div class="legend-item"><div class="legend-color color-sorted"></div>已排序</div>
   </div>
   <div id="canvas" aria-live="polite"></div>
+  
+  <div class="info-panel">
+    <div class="info-section">
+      <div class="info-title">📚 排序原理</div>
+      <div class="info-content">
+        採用分治法：將陣列分成兩半遞迴排序，然後將兩個有序陣列合併成一個有序陣列。
+      </div>
+      <div class="complexity">
+        ⏱ 時間複雜度：<br>
+        最差：O(n log n) | 平均：O(n log n) | 最佳：O(n log n)
+      </div>
+    </div>
+    <div class="info-section">
+      <div class="info-title">📊 統計資訊</div>
+      <div class="stats-row">
+        <span class="stats-label">比較次數：</span>
+        <span class="stats-value" id="compareCount">0</span>
+      </div>
+      <div class="stats-row">
+        <span class="stats-label">移動次數：</span>
+        <span class="stats-value" id="swapCount">0</span>
+      </div>
+      <div class="stats-row">
+        <span class="stats-label">耗時：</span>
+        <span class="stats-value"><span id="sampleTimer">0.00</span> 秒</span>
+      </div>
+      <div class="stats-row">
+        <span class="stats-label">狀態：</span>
+        <span class="stats-value">
+          <span class="status-indicator status-idle" id="statusIndicator"></span>
+          <span id="statusText">待命</span>
+        </span>
+      </div>
+    </div>
+  </div>
+  
   <footer>說明：黃色 = 比較，綠色 = 合併操作，藍綠色 = 已排序。採用分治法逐步分解與合併陣列。可調整速度與大小，按「單步」可執行一次操作。</footer>
 
   <script>
@@ -235,12 +336,36 @@
     let startTime = 0;
     let elapsedTime = 0;
     let timerInterval = null;
+    let compareCount = 0;
+    let swapCount = 0;
     let delay = ms => new Promise(r=>setTimeout(r,ms));
+
+    function updateStats(){
+      document.getElementById('compareCount').textContent = compareCount;
+      document.getElementById('swapCount').textContent = swapCount;
+    }
+
+    function setStatus(status){
+      const indicator = document.getElementById('statusIndicator');
+      const text = document.getElementById('statusText');
+      indicator.className = 'status-indicator ' + status;
+      text.textContent = status === 'status-running' ? '進行中' : 
+                         status === 'status-paused' ? '暫停' :
+                         status === 'status-completed' ? '完成' : '待命';
+    }
+
+    function resetStats(){
+      compareCount = 0;
+      swapCount = 0;
+      updateStats();
+      setStatus('status-idle');
+    }
 
     function createArray(n){
       arr = Array.from({length:n},()=>Math.floor(Math.random()*100)+5);
       render();
       resetTimer();
+      resetStats();
     }
 
     function clearCanvas(){
@@ -295,6 +420,7 @@
     async function mergeSort(){
       running = true;
       paused = false;
+      setStatus('status-running');
       startTimer();
       await mergeSortHelper(0, arr.length - 1);
       // Mark all as sorted at the end
@@ -304,6 +430,7 @@
         mark(i, 'sorted');
       }
       stopTimer();
+      setStatus('status-completed');
       running = false;
     }
 
@@ -341,6 +468,8 @@
         // Mark comparison
         mark(left + i, 'compare');
         mark(mid + 1 + j, 'compare');
+        compareCount++;
+        updateStats();
         await delay(1010 - Number(speedInput.value));
         if(paused){ await waitWhilePaused(); }
 
@@ -355,6 +484,8 @@
         }
         updateBar(k);
         k++;
+        swapCount++;
+        updateStats();
         await delay(1010 - Number(speedInput.value));
         if(paused){ await waitWhilePaused(); }
       }
@@ -408,8 +539,8 @@
       stopRun();
       createArray(Number(sizeInput.value)); 
     });
-    startBtn.addEventListener('click',()=>{ if(!running) mergeSort(); else { paused=false; } });
-    pauseBtn.addEventListener('click',()=>{ paused = true; });
+    startBtn.addEventListener('click',()=>{ if(!running) mergeSort(); else { paused=false; setStatus('status-running'); } });
+    pauseBtn.addEventListener('click',()=>{ paused = true; setStatus('status-paused'); });
     stepBtn.addEventListener('click',()=>{ if(running) { paused=true; } });
 
     // initialize
