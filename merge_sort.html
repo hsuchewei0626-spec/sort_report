@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>合併排序法 Merge Sort 示範</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e8eef5 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 20px;
+      min-height: 100vh;
+    }
+    .page-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #2c3e50;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .algorithm-desc {
+      font-size: 13px;
+      color: #7f8c8d;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 20px;
+      background: white;
+      padding: 16px 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      max-width: 900px;
+    }
+    .control-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    label.small {
+      font-size: 12px;
+      color: #555;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    input[type=range] {
+      width: 140px;
+      height: 6px;
+      border-radius: 3px;
+      background: linear-gradient(to right, #e8eef5, #667eea);
+      outline: none;
+      -webkit-appearance: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+    }
+    input[type=range]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+    }
+    #canvas {
+      width: 100%;
+      max-width: 900px;
+      height: 320px;
+      border: none;
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9fc 100%);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      margin-bottom: 20px;
+    }
+    .bar {
+      background: linear-gradient(180deg, #667eea 0%, #5568d3 100%);
+      flex-shrink: 0;
+      border-radius: 4px 4px 0 0;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 600;
+      transition: all 0.1s ease;
+      box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+    }
+    .bar.compare {
+      background: linear-gradient(180deg, #f0a202 0%, #d98a00 100%);
+      box-shadow: 0 2px 8px rgba(240, 162, 2, 0.4);
+    }
+    .bar.merge {
+      background: linear-gradient(180deg, #7bd389 0%, #5fc560 100%);
+      box-shadow: 0 2px 8px rgba(123, 211, 137, 0.4);
+    }
+    .bar.sorted {
+      background: linear-gradient(180deg, #52c4b8 0%, #3eb8ac 100%);
+      box-shadow: 0 2px 8px rgba(82, 196, 184, 0.4);
+    }
+    .legend {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      font-size: 12px;
+      color: #555;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .legend-item {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .legend-color {
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+    }
+    .color-compare { background: #f0a202; }
+    .color-merge { background: #7bd389; }
+    .color-sorted { background: #52c4b8; }
+    button, input[type=number] {
+      padding: 10px 14px;
+      border-radius: 6px;
+      border: none;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: white;
+      color: #555;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+    button:hover {
+      background: #f0f0f0;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+    button:active {
+      transform: scale(0.98);
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    input[type=number] {
+      width: 70px;
+      text-align: center;
+    }
+    footer {
+      margin-top: 20px;
+      padding: 16px 20px;
+      color: #7f8c8d;
+      font-size: 12px;
+      line-height: 1.6;
+      background: white;
+      border-radius: 8px;
+      max-width: 900px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      border-left: 3px solid #667eea;
+    }
+  </style>
+</head>
+<body>
+  <div class="page-header">
+    <h1>🔀 合併排序法</h1>
+    <p class="algorithm-desc">Merge Sort - 分治法將數組分解後合併排序</p>
+  </div>
+  <div class="controls">
+    <label class="small">元素數量:</label>
+    <input id="size" type="number" min="5" max="128" value="32" style="width:64px" />
+    <label class="small">速度:</label>
+    <input id="speed" type="range" min="10" max="1000" value="200" />
+    <button id="random">隨機產生</button>
+    <button id="start">開始</button>
+    <button id="pause">暫停</button>
+    <button id="step">單步</button>
+  </div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-color color-compare"></div>比較</div>
+    <div class="legend-item"><div class="legend-color color-merge"></div>合併</div>
+    <div class="legend-item"><div class="legend-color color-sorted"></div>已排序</div>
+  </div>
+  <div id="canvas" aria-live="polite"></div>
+  <footer>說明：黃色 = 比較，綠色 = 合併操作，藍綠色 = 已排序。採用分治法逐步分解與合併陣列。可調整速度與大小，按「單步」可執行一次操作。</footer>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const sizeInput = document.getElementById('size');
+    const speedInput = document.getElementById('speed');
+    const randomBtn = document.getElementById('random');
+    const startBtn = document.getElementById('start');
+    const pauseBtn = document.getElementById('pause');
+    const stepBtn = document.getElementById('step');
+
+    let arr = [];
+    let bars = [];
+    let running = false;
+    let paused = false;
+    let delay = ms => new Promise(r=>setTimeout(r,ms));
+
+    function createArray(n){
+      arr = Array.from({length:n},()=>Math.floor(Math.random()*100)+5);
+      render();
+    }
+
+    function clearCanvas(){
+      canvas.innerHTML='';
+      bars = [];
+    }
+
+    function render(){
+      clearCanvas();
+      const max = Math.max(...arr);
+      const width = Math.min(24, Math.floor((canvas.clientWidth - (arr.length-1)*4)/arr.length));
+      arr.forEach((v,i)=>{
+        const bar = document.createElement('div');
+        bar.className = 'bar';
+        bar.style.height = Math.max(8, Math.round((v/max)*(canvas.clientHeight-20)))+'px';
+        bar.style.width = width+'px';
+        bar.textContent = v;
+        canvas.appendChild(bar);
+        bars.push(bar);
+      })
+    }
+
+    function mark(i,cls){ if(bars[i]) bars[i].classList.add(cls); }
+    function unmark(i,cls){ if(bars[i]) bars[i].classList.remove(cls); }
+    
+    function updateBar(i){
+      const max = Math.max(...arr);
+      if(bars[i]){
+        bars[i].style.height = Math.max(8, Math.round((arr[i]/max)*(canvas.clientHeight-20)))+'px';
+        bars[i].textContent = arr[i];
+      }
+    }
+
+    async function mergeSort(){
+      running = true;
+      paused = false;
+      await mergeSortHelper(0, arr.length - 1);
+      // Mark all as sorted at the end
+      for(let i = 0; i < arr.length; i++){
+        unmark(i, 'compare');
+        unmark(i, 'merge');
+        mark(i, 'sorted');
+      }
+      running = false;
+    }
+
+    async function mergeSortHelper(left, right){
+      if(!running) return;
+      if(left >= right) return;
+
+      const mid = Math.floor((left + right) / 2);
+      
+      // Sort left half
+      await mergeSortHelper(left, mid);
+      // Sort right half
+      await mergeSortHelper(mid + 1, right);
+      // Merge
+      await merge(left, mid, right);
+    }
+
+    async function merge(left, mid, right){
+      if(!running) return;
+      
+      const leftArr = arr.slice(left, mid + 1);
+      const rightArr = arr.slice(mid + 1, right + 1);
+      let i = 0, j = 0, k = left;
+
+      // Mark the range being merged
+      for(let p = left; p <= right; p++){
+        mark(p, 'merge');
+      }
+      await delay(Number(speedInput.value));
+      if(paused){ await waitWhilePaused(); }
+
+      while(i < leftArr.length && j < rightArr.length){
+        if(!running) return;
+        
+        // Mark comparison
+        mark(left + i, 'compare');
+        mark(mid + 1 + j, 'compare');
+        await delay(Number(speedInput.value));
+        if(paused){ await waitWhilePaused(); }
+
+        if(leftArr[i] <= rightArr[j]){
+          arr[k] = leftArr[i];
+          unmark(left + i, 'compare');
+          i++;
+        } else {
+          arr[k] = rightArr[j];
+          unmark(mid + 1 + j, 'compare');
+          j++;
+        }
+        updateBar(k);
+        k++;
+        await delay(Number(speedInput.value));
+        if(paused){ await waitWhilePaused(); }
+      }
+
+      while(i < leftArr.length){
+        if(!running) return;
+        arr[k] = leftArr[i];
+        unmark(left + i, 'compare');
+        updateBar(k);
+        i++;
+        k++;
+        await delay(Number(speedInput.value));
+        if(paused){ await waitWhilePaused(); }
+      }
+
+      while(j < rightArr.length){
+        if(!running) return;
+        arr[k] = rightArr[j];
+        unmark(mid + 1 + j, 'compare');
+        updateBar(k);
+        j++;
+        k++;
+        await delay(Number(speedInput.value));
+        if(paused){ await waitWhilePaused(); }
+      }
+
+      // Unmark merge
+      for(let p = left; p <= right; p++){
+        unmark(p, 'merge');
+      }
+      
+      // Mark merged section as sorted
+      for(let p = left; p <= right; p++){
+        mark(p, 'sorted');
+      }
+      await delay(Number(speedInput.value));
+      if(paused){ await waitWhilePaused(); }
+    }
+
+    function stopRun(){ running = false; }
+
+    function waitWhilePaused(){
+      return new Promise(resolve=>{
+        const check = ()=>{ if(!paused) resolve(); else setTimeout(check,50); };
+        check();
+      })
+    }
+
+    // UI bindings
+    randomBtn.addEventListener('click',()=>{ 
+      stopRun();
+      createArray(Number(sizeInput.value)); 
+    });
+    startBtn.addEventListener('click',()=>{ if(!running) mergeSort(); else { paused=false; } });
+    pauseBtn.addEventListener('click',()=>{ paused = true; });
+    stepBtn.addEventListener('click',()=>{ if(running) { paused=true; } });
+
+    // initialize
+    createArray(Number(sizeInput.value));
+
+    window.__merge = {arr,bars,render,createArray};
+  </script>
+</body>
+</html>
