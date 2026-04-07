@@ -2,7 +2,7 @@
 
 **學號：** 11428146   
 **姓名：** 許哲瑋    
-**模擬頁面：** [https://github.com/hsuchewei0626-spec/sort_report/](https://github.com/hsuchewei0626-spec/sort_report/)
+**模擬頁面：** [(https://hsuchewei0626-spec.github.io/sort_report/index.html)](https://hsuchewei0626-spec.github.io/sort_report/index.html)
 
 ---
 
